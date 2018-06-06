@@ -1,0 +1,58 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"/>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<!--  <div class="container">
+  <div class="row border border-primary rounded">
+    <div class="col-sm-4 col-md-4">
+      GPU
+    </div>
+    <div class="col-sm-4 col-md-4">
+      Memory usage (%)
+    </div>
+    <div class="col-sm-4 col-md-4">
+      GPU load
+    </div>
+  </div>
+
+      {% for id,gpuinfo in toPass.items() %}
+              <div class="row row border border-success rounded-bottom">
+                 {% for value in gpuinfo %}
+                  <div class="col-sm-4 col-md-4">
+                      {{value}}
+                  </div>
+                  {% endfor %}
+              </div>
+      {% endfor %}
+
+</div>-->
+
+<div class="container">
+    <div class="table-responsive">
+    <table class="table">
+        <thead class="thead-dark">
+        <tr>
+
+            <th> GPU</th>
+            <th>Memory usage (%)</th>
+            <th>GPU load</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for id,gpuinfo in toPass.items() %}
+        <tr class="info">
+            {% for value in gpuinfo %}
+            <th>{{value}}</th>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+
+        </tbody>
+
+
+    </table>
+</div>
+</body>
+</html>
