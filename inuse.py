@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, send_from_directory, redirect, url_for
 
 import GPUtil
 app = Flask(__name__, static_url_path="", template_folder="static")
@@ -14,10 +14,16 @@ def nvidia_smi():
         GPU_information[id] = (id, memory_percentage, CPU_load)
 
     res = render_template("html/nvidiasmi.html",
-                          toPass = GPU_information
-    )
+                          toPass=GPU_information
+                          )
 
     return res
+
+
+@app.route("/")
+def root():
+    return redirect(url_for("nvidia_smi"))
+
 
 @app.route('/html/<path:path>')
 def send_js(path):
