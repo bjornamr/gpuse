@@ -1,24 +1,35 @@
 from flask import Flask, render_template, send_from_directory, redirect, url_for
-
-import GPUtil
+import subprocess
+import xmltodict
 app = Flask(__name__, static_url_path="", template_folder="static")
 
 GPU_information = {}
 
 @app.route('/inuse')
 def nvidia_smi():
-    for x in GPUtil.getGPUs():
-        id = x.id
-        memory_percentage = round(x.memoryUsed / x.memoryTotal * 100, 2)
-        CPU_load = x.load
-        GPU_information[id] = (id, memory_percentage, CPU_load)
+    GPU_information = xmlnvidiasmi()
 
     res = render_template("html/nvidiasmi.html",
                           toPass=GPU_information
                           )
-
     return res
 
+def xmlnvidiasmi():
+    r = subprocess.getoutput('nvidia-smi --xml-format -q')
+    #print(r)
+    newdict = xmltodict.parse(r)
+    gpus = newdict["nvidia_smi_log"]["gpu"]
+    gpu_result = {}
+    for gpu in gpus:
+        id = int(gpus["minor_number"])
+        fanspeed = gpus["fan_speed"]
+        name = gpus["product_name"]
+        gpu_temp = gpus["temperature"]["gpu_temp"]
+        memory_percentage = round(float(gpus["fb_memory_usage"]["used"].split()[0]) / \
+                            float(gpus["fb_memory_usage"]["total"].split()[0]) * 100, 2)
+        GPU_load = gpus["utilization"]["gpu_util"]
+        gpu_result[id] = (id, str(memory_percentage) + " %", GPU_load, fanspeed, gpu_temp, name)
+    return gpu_result
 
 @app.route("/")
 def root():
@@ -32,5 +43,4 @@ def send_js(path):
 
 if __name__ == "__main__":
     app.run()
-
 
