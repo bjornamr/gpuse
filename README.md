@@ -3,9 +3,14 @@
 # GPUse
 
 Using this simple utility we can see if the server is in use or not.
-More information will be added later.
+Please come with suggestions on what would be nice to have in this utility. 
+Pull requests are welcome. 
 
-GPUid, memory usage and GPU load is shown as of now.
+Information available now: 
+
+ - GPU, Memory usage, GPU load, Fan speed, GPU temp and GPU name
+
+
 
 ### Screenshot
 

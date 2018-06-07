@@ -7,28 +7,30 @@ GPU_information = {}
 
 @app.route('/inuse')
 def nvidia_smi():
-    GPU_information = xmlnvidiasmi()
+    GPU_information = parsedNvidiaSmi()
 
     res = render_template("html/nvidiasmi.html",
                           toPass=GPU_information
                           )
     return res
 
-def xmlnvidiasmi():
-    r = subprocess.getoutput('nvidia-smi --xml-format -q')
-    #print(r)
-    newdict = xmltodict.parse(r)
-    gpus = newdict["nvidia_smi_log"]["gpu"]
+def getNvidiaSmiXML():
+    return subprocess.getoutput('nvidia-smi --xml-format -q')
+
+def parsedNvidiaSmi():
+    xml = getNvidiaSmiXML()
+    gpu_information = xmltodict.parse(xml)
+    gpus = gpu_information["nvidia_smi_log"]["gpu"]
     gpu_result = {}
     for gpu in gpus:
-        id = int(gpus["minor_number"])
-        fanspeed = gpus["fan_speed"]
-        name = gpus["product_name"]
-        gpu_temp = gpus["temperature"]["gpu_temp"]
-        memory_percentage = round(float(gpus["fb_memory_usage"]["used"].split()[0]) / \
-                            float(gpus["fb_memory_usage"]["total"].split()[0]) * 100, 2)
-        GPU_load = gpus["utilization"]["gpu_util"]
-        gpu_result[id] = (id, str(memory_percentage) + " %", GPU_load, fanspeed, gpu_temp, name)
+        id = int(gpu["minor_number"])
+        fan_speed = gpu["fan_speed"]
+        name = gpu["product_name"]
+        gpu_temp = gpu["temperature"]["gpu_temp"]
+        memory_percentage = round(float(gpu["fb_memory_usage"]["used"].split()[0]) / \
+                            float(gpu["fb_memory_usage"]["total"].split()[0]) * 100, 2)
+        GPU_load = gpu["utilization"]["gpu_util"]
+        gpu_result[id] = (id, str(memory_percentage) + " %", GPU_load, fan_speed, gpu_temp, name)
     return gpu_result
 
 @app.route("/")
