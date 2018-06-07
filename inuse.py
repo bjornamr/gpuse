@@ -1,7 +1,11 @@
 from flask import Flask, render_template, send_from_directory, redirect, url_for
+import time
 import subprocess
 import xmltodict
 app = Flask(__name__, static_url_path="", template_folder="static")
+
+OLD_STAMP = 0
+NVIDIA_SMI_XML = None
 
 GPU_information = {}
 
@@ -14,8 +18,17 @@ def nvidia_smi():
                           )
     return res
 
-def getNvidiaSmiXML():
-    return subprocess.getoutput('nvidia-smi --xml-format -q')
+def getNvidiaSmiXML(caching=10):
+    global OLD_STAMP
+    global NVIDIA_SMI_XML
+    stamp = time.time()
+    subprocess.getoutput('nvidia-smi --xml-format -q')
+    diff = stamp - OLD_STAMP
+    if diff > caching:
+        OLD_STAMP = stamp
+        print("changed xml", diff, caching)
+        NVIDIA_SMI_XML = subprocess.getoutput('nvidia-smi --xml-format -q')
+    return NVIDIA_SMI_XML
 
 def parsedNvidiaSmi():
     xml = getNvidiaSmiXML()
@@ -44,5 +57,5 @@ def send_js(path):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0")
 
