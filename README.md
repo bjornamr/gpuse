@@ -13,7 +13,7 @@ Information available now:
 
 ### Usage
 
-1. Install requirements with
+1. Install requirements with:
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pip install -r requirements.txt
     
