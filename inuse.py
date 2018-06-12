@@ -1,4 +1,8 @@
-from flask import Flask, render_template, send_from_directory, redirect, url_for
+from flask import Flask, \
+    render_template, \
+    send_from_directory, \
+    redirect, \
+    url_for
 import time
 import subprocess
 import xmltodict
@@ -9,16 +13,18 @@ NVIDIA_SMI_XML = None
 
 GPU_information = {}
 
+
 @app.route('/inuse')
 def nvidia_smi():
-    GPU_information = parsedNvidiaSmi()
+    gpu_information = parsed_nvidiasmi()
 
     res = render_template("html/nvidiasmi.html",
-                          toPass=GPU_information
+                          toPass=gpu_information
                           )
     return res
 
-def getNvidiaSmiXML(caching=10):
+
+def nvidiasmi_xml(caching=10):
     global OLD_STAMP
     global NVIDIA_SMI_XML
     stamp = time.time()
@@ -26,12 +32,13 @@ def getNvidiaSmiXML(caching=10):
     diff = stamp - OLD_STAMP
     if diff > caching:
         OLD_STAMP = stamp
-        print("changed xml", diff, caching)
+        print("changed xml", NVIDIA_SMI_XML)
         NVIDIA_SMI_XML = subprocess.getoutput('nvidia-smi --xml-format -q')
     return NVIDIA_SMI_XML
 
-def parsedNvidiaSmi():
-    xml = getNvidiaSmiXML()
+
+def parsed_nvidiasmi():
+    xml = nvidiasmi_xml()
     gpu_information = xmltodict.parse(xml)
     gpus = gpu_information["nvidia_smi_log"]["gpu"]
     gpu_result = {}
@@ -40,11 +47,19 @@ def parsedNvidiaSmi():
         fan_speed = gpu["fan_speed"]
         name = gpu["product_name"]
         gpu_temp = gpu["temperature"]["gpu_temp"]
-        memory_percentage = round(float(gpu["fb_memory_usage"]["used"].split()[0]) / \
-                            float(gpu["fb_memory_usage"]["total"].split()[0]) * 100, 2)
-        GPU_load = gpu["utilization"]["gpu_util"]
-        gpu_result[id] = (id, str(memory_percentage) + " %", GPU_load, fan_speed, gpu_temp, name)
+        used = float(gpu["fb_memory_usage"]["used"].split()[0])
+        total = float(gpu["fb_memory_usage"]["total"].split()[0])
+        memory_percentage = round((used / total) * 100, 2)
+        gpu_load = gpu["utilization"]["gpu_util"]
+        gpu_result[id] = (id,
+                          str(memory_percentage) + " %",
+                          gpu_load,
+                          fan_speed,
+                          gpu_temp,
+                          name
+                          )
     return gpu_result
+
 
 @app.route("/")
 def root():
